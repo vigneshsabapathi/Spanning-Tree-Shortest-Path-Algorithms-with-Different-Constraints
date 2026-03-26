@@ -42,7 +42,6 @@ def run_mst_benchmark(
     for n in sizes:
         g = gen_connected_graph(n, density, max_weight, seed=42)
 
-        # ── Kruskal ──────────────────────────────────────────────────────
         times: list[float] = []
         r_kruskal = None
         for _ in range(runs):
@@ -63,7 +62,6 @@ def run_mst_benchmark(
             )
         )
 
-        # ── Prim ─────────────────────────────────────────────────────────
         times = []
         r_prim = None
         for _ in range(runs):
@@ -108,8 +106,6 @@ def run_sp_benchmark(
 
     for n in sizes:
         g_plain = gen_connected_graph(n, density, max_weight, seed=42)
-
-        # Build a penalty-augmented copy for the obstacle variant
         g_obstacle = gen_connected_graph(n, density, max_weight, seed=42)
         rng = random.Random(99)
         for edge in g_obstacle.edge_list:
@@ -117,7 +113,6 @@ def run_sp_benchmark(
                 penalty = rng.randint(2, 5)
                 g_obstacle.set_edge_penalty(edge.src, edge.dest, penalty)
 
-        # ── Plain Dijkstra ────────────────────────────────────────────────
         times: list[float] = []
         r_dijkstra = None
         for _ in range(runs):
@@ -127,7 +122,6 @@ def run_sp_benchmark(
             times.append(elapsed)
         avg = sum(times) / len(times)
 
-        # Pick the maximum reachable distance as a representative scalar
         max_dist = max(
             (d for d in r_dijkstra.dist.values() if d >= 0),
             default=0,
@@ -144,7 +138,6 @@ def run_sp_benchmark(
             )
         )
 
-        # ── Obstacle Dijkstra ─────────────────────────────────────────────
         times = []
         r_obstacle = None
         for _ in range(runs):
