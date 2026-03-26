@@ -34,8 +34,7 @@ SPResult sp_dijkstra_obstacle(const Graph *g, int source)
     }
 
     while (!heap_is_empty(heap)) {
-        HeapNode node = heap_extract_min(heap);
-        int u         = node.value;
+        int u = heap_extract_min(heap).value;
 
         if (result.dist[u] == INF) {
             break;
@@ -53,12 +52,8 @@ SPResult sp_dijkstra_obstacle(const Graph *g, int source)
             int weight  = adj->weight;
             int penalty = g->edge_penalty[adj->edge_id];
 
-            /* Overflow guard for effective_weight = weight * penalty */
-            int effective_weight;
             if (penalty != 0 && weight > INF / penalty) continue;
-            effective_weight = weight * penalty;
-
-            /* Overflow guard for dist[u] + effective_weight */
+            int effective_weight = weight * penalty;
             if (result.dist[u] > INF - effective_weight) continue;
 
             int new_dist = result.dist[u] + effective_weight;
