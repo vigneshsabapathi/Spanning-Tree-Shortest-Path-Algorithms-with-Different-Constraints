@@ -7,20 +7,12 @@
 #include <stdlib.h>
 #include <time.h>
 
-/* ---------------------------------------------------------------------------
- * Helper
- * ------------------------------------------------------------------------- */
-
 static long get_time_us(void)
 {
     struct timespec ts;
     clock_gettime(CLOCK_MONOTONIC, &ts);
     return (long)ts.tv_sec * 1000000L + (long)(ts.tv_nsec / 1000L);
 }
-
-/* ---------------------------------------------------------------------------
- * Individual benchmark functions
- * ------------------------------------------------------------------------- */
 
 BenchmarkResult bench_kruskal(Graph *g)
 {
@@ -82,10 +74,6 @@ BenchmarkResult bench_dijkstra_obstacle(Graph *g, int src, int dest)
     return br;
 }
 
-/* ---------------------------------------------------------------------------
- * MST comparison suite
- * ------------------------------------------------------------------------- */
-
 void benchmark_mst_comparison(void)
 {
     typedef struct { int V; double density; } MSTConfig;
@@ -113,13 +101,10 @@ void benchmark_mst_comparison(void)
         for (int i = 0; i < RUNS; i++) {
             BenchmarkResult kr = bench_kruskal(g);
             BenchmarkResult pr = bench_prim(g, 0);
-
             kruskal_time_sum += kr.time_us;
             prim_time_sum    += pr.time_us;
-
-            /* capture weight from last run (deterministic) */
-            kruskal_weight = kr.total_weight;
-            prim_weight    = pr.total_weight;
+            kruskal_weight    = kr.total_weight;
+            prim_weight       = pr.total_weight;
         }
 
         long kruskal_avg = kruskal_time_sum / RUNS;
@@ -143,10 +128,6 @@ void benchmark_mst_comparison(void)
     }
 }
 
-/* ---------------------------------------------------------------------------
- * Shortest-path comparison suite
- * ------------------------------------------------------------------------- */
-
 void benchmark_sp_comparison(void)
 {
     typedef struct { int V; double density; } SPConfig;
@@ -167,18 +148,12 @@ void benchmark_sp_comparison(void)
         int src  = 0;
         int dest = V - 1;
 
-        /* Set penalties on ~20 % of edges before running the obstacle variant.
-         * We iterate over the edge_list directly and tag every 5th edge. */
+        /* Tag every 5th edge with a penalty of 3-5. */
         int num_edges = g->num_edges;
-        int step      = (num_edges >= 5) ? (num_edges / (num_edges / 5)) : 1;
-        /* simpler: tag every edge whose index % 5 == 0 */
         for (int e = 0; e < num_edges; e += 5) {
             Edge *edge = &g->edge_list[e];
-            /* penalty between 3 and 5 */
-            int penalty = 3 + (e % 3);   /* cycles 3,4,5,3,4,5,... */
-            graph_set_edge_penalty(g, edge->src, edge->dest, penalty);
+            graph_set_edge_penalty(g, edge->src, edge->dest, 3 + (e % 3));
         }
-        (void)step; /* suppress unused-variable warning */
 
         BenchmarkResult dr  = bench_dijkstra(g, src, dest);
         BenchmarkResult dro = bench_dijkstra_obstacle(g, src, dest);
