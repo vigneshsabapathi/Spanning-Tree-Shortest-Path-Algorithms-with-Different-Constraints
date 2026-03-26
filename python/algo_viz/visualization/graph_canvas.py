@@ -72,7 +72,6 @@ class GraphCanvas(FigureCanvasQTAgg):
             x1, y1 = self.pos[edge.src]
             x2, y2 = self.pos[edge.dest]
 
-            # Determine style
             if edge.blocked:
                 color = Colors.EDGE_BLOCKED
                 lw = Colors.EDGE_WIDTH
@@ -102,7 +101,6 @@ class GraphCanvas(FigureCanvasQTAgg):
                 zorder=1,
             )
 
-            # Weight label at midpoint
             midx = (x1 + x2) / 2
             midy = (y1 + y2) / 2
             label = str(edge.weight)
