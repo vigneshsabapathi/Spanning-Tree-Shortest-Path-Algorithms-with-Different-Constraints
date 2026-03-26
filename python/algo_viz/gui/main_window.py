@@ -11,22 +11,18 @@ class MainWindow(QMainWindow):
         tabs = QTabWidget()
         self.setCentralWidget(tabs)
 
-        # Tab 1: Single algorithm visualizer
         from algo_viz.gui.visualizer_tab import VisualizerTab
         self.visualizer = VisualizerTab()
         tabs.addTab(self.visualizer, "Visualizer")
 
-        # Tab 2: Side-by-side algorithm comparison
         from algo_viz.gui.comparison_tab import ComparisonTab
         self.comparison = ComparisonTab()
         tabs.addTab(self.comparison, "Compare")
 
-        # Tab 3: Benchmark runner with charts
         from algo_viz.gui.benchmark_tab import BenchmarkTab
         self.benchmark = BenchmarkTab()
         tabs.addTab(self.benchmark, "Benchmark")
 
-        # Tab 4: About
         about_text = (
             "<h2>Graph Algorithms Visualizer</h2>"
             "<p>An interactive PyQt6 application for exploring and comparing "
@@ -58,5 +54,4 @@ class MainWindow(QMainWindow):
         about_label.setStyleSheet("font-size: 13px; line-height: 1.5;")
         tabs.addTab(about_label, "About")
 
-        # Status bar
         self.statusBar().showMessage("Ready")
