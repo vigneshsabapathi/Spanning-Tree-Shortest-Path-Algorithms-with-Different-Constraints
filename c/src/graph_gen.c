@@ -2,10 +2,6 @@
 #include <stdlib.h>
 #include <time.h>
 
-/* -----------------------------------------------------------------------
- * Helper: check whether an undirected edge (u, v) already exists by
- * scanning the adjacency list of u.
- * --------------------------------------------------------------------- */
 static int edge_exists(const Graph *g, int u, int v)
 {
     AdjNode *node = g->adj[u].head;
@@ -17,19 +13,12 @@ static int edge_exists(const Graph *g, int u, int v)
     return 0;
 }
 
-/* -----------------------------------------------------------------------
- * 1. gen_random_graph
- *    Iterates every undirected pair (i,j), i<j, and adds each edge with
- *    probability == density.
- * --------------------------------------------------------------------- */
 Graph *gen_random_graph(int num_vertices, double density, int max_weight,
                         unsigned int seed)
 {
     srand(seed);
 
     Graph *g = graph_create(num_vertices);
-    if (!g)
-        return NULL;
 
     for (int i = 0; i < num_vertices; i++) {
         for (int j = i + 1; j < num_vertices; j++) {
@@ -44,21 +33,15 @@ Graph *gen_random_graph(int num_vertices, double density, int max_weight,
     return g;
 }
 
-/* -----------------------------------------------------------------------
- * 2. gen_connected_graph
- *    Guarantees connectivity via a random spanning tree (Fisher-Yates
- *    shuffle), then fills in extra edges to approach the target density.
- * --------------------------------------------------------------------- */
+/* Guarantees connectivity via a random spanning tree (Fisher-Yates shuffle),
+ * then adds extra edges to approach the target density. */
 Graph *gen_connected_graph(int num_vertices, double density, int max_weight,
                            unsigned int seed)
 {
     srand(seed);
 
     Graph *g = graph_create(num_vertices);
-    if (!g)
-        return NULL;
 
-    /* Build a shuffled vertex array (Fisher-Yates). */
     int *shuffled = malloc(num_vertices * sizeof(int));
     if (!shuffled) {
         graph_destroy(g);
@@ -73,14 +56,12 @@ Graph *gen_connected_graph(int num_vertices, double density, int max_weight,
         shuffled[j] = tmp;
     }
 
-    /* Connect consecutive vertices in the shuffled order → spanning tree. */
     for (int i = 0; i < num_vertices - 1; i++) {
         int w = (rand() % max_weight) + 1;
         graph_add_edge(g, shuffled[i], shuffled[i + 1], w);
     }
     free(shuffled);
 
-    /* Determine how many more edges are needed to hit target density. */
     long long max_edges    = (long long)num_vertices * (num_vertices - 1) / 2;
     int       target_edges = (int)(density * (double)max_edges);
     int       attempts     = target_edges * 10 + num_vertices * num_vertices;
@@ -100,58 +81,36 @@ Graph *gen_connected_graph(int num_vertices, double density, int max_weight,
     return g;
 }
 
-/* -----------------------------------------------------------------------
- * 3. gen_grid_graph
- *    Each cell (r,c) is vertex r*cols+c.  Edges connect right and down
- *    neighbours.
- * --------------------------------------------------------------------- */
+/* Each cell (r,c) maps to vertex r*cols+c; edges connect right and down neighbours. */
 Graph *gen_grid_graph(int rows, int cols, int max_weight, unsigned int seed)
 {
     srand(seed);
 
     int num_vertices = rows * cols;
     Graph *g = graph_create(num_vertices);
-    if (!g)
-        return NULL;
 
     for (int r = 0; r < rows; r++) {
         for (int c = 0; c < cols; c++) {
             int v = r * cols + c;
-
-            /* Right neighbour */
-            if (c + 1 < cols) {
-                int w = (rand() % max_weight) + 1;
-                graph_add_edge(g, v, v + 1, w);
-            }
-
-            /* Down neighbour */
-            if (r + 1 < rows) {
-                int w = (rand() % max_weight) + 1;
-                graph_add_edge(g, v, v + cols, w);
-            }
+            if (c + 1 < cols)
+                graph_add_edge(g, v, v + 1, (rand() % max_weight) + 1);
+            if (r + 1 < rows)
+                graph_add_edge(g, v, v + cols, (rand() % max_weight) + 1);
         }
     }
 
     return g;
 }
 
-/* -----------------------------------------------------------------------
- * 4. gen_obstacle_graph
- *    Builds a grid graph then:
- *      - Randomly blocks a fraction of interior vertices.
- *      - Randomly applies a penalty factor (2-5) to a fraction of edges.
- * --------------------------------------------------------------------- */
+/* Builds a grid graph then randomly blocks interior vertices and applies
+ * penalty factors (2-5) to ~20% of edges. */
 Graph *gen_obstacle_graph(int rows, int cols, double obstacle_fraction,
                           int max_weight, unsigned int seed)
 {
-    /* gen_grid_graph already calls srand(seed), so the RNG is seeded. */
     Graph *g = gen_grid_graph(rows, cols, max_weight, seed);
-    if (!g)
-        return NULL;
 
     int V = g->num_vertices;
 
-    /* Block random interior vertices (never block vertex 0 or V-1). */
     int num_to_block = (int)(obstacle_fraction * V);
     int blocked      = 0;
     int attempts     = num_to_block * 20 + V;
@@ -166,7 +125,6 @@ Graph *gen_obstacle_graph(int rows, int cols, double obstacle_fraction,
         blocked++;
     }
 
-    /* Apply a penalty factor (2-5) to roughly 20 % of edges. */
     double penalty_fraction = 0.20;
     int    num_edges        = g->num_edges;
 
