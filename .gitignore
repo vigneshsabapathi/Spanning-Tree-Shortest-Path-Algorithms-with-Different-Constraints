@@ -1,0 +1,6 @@
+obj/
+bin/
+*.o
+*.d
+*.dSYM/
+.DS_Store
