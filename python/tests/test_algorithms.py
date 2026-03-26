@@ -13,10 +13,6 @@ from algo_viz.core.sp_obstacle import dijkstra_obstacle
 from algo_viz.models.step import StepKind
 
 
-# ---------------------------------------------------------------------------
-# Helpers
-# ---------------------------------------------------------------------------
-
 def _make_5v_graph() -> Graph:
     """5-vertex graph used in Dijkstra tests.
 
@@ -34,10 +30,6 @@ def _make_5v_graph() -> Graph:
     g.add_edge(3, 4, 5)
     return g
 
-
-# ---------------------------------------------------------------------------
-# MST — Kruskal
-# ---------------------------------------------------------------------------
 
 def test_kruskal_demo():
     g = gen_demo_graph()
@@ -70,10 +62,6 @@ def test_kruskal_disconnected():
     assert result.is_connected is False
 
 
-# ---------------------------------------------------------------------------
-# Shortest paths — Dijkstra
-# ---------------------------------------------------------------------------
-
 def test_dijkstra_basic():
     g = _make_5v_graph()
     result = dijkstra(g, 0)
@@ -96,10 +84,8 @@ def test_dijkstra_blocked():
     g = _make_5v_graph()
     g.block_vertex(2)
     result = dijkstra(g, 0)
-    # Without vertex 2: 0→1 costs 10, then 1→3 costs 2  → dist[3]=12
     assert result.dist[1] == 10
     assert result.dist[3] == 12
-    # Vertex 2 itself is unreachable (blocked)
     assert result.dist[2] == -1
 
 
@@ -113,31 +99,18 @@ def test_dijkstra_obstacle():
     assert result.dist[1] == 10
 
 
-# ---------------------------------------------------------------------------
-# Step generators — Kruskal
-# ---------------------------------------------------------------------------
-
 def test_kruskal_steps():
     g = gen_demo_graph()
     steps = list(kruskal_steps(g))
 
     assert len(steps) > 0
-
-    # First algorithmic step is always CONSIDERING_EDGE
     assert steps[0].kind == StepKind.CONSIDERING_EDGE
 
-    # There must be at least one EDGE_ACCEPTED and one EDGE_REJECTED step
     kinds = [s.kind for s in steps]
     assert StepKind.EDGE_ACCEPTED in kinds
     assert StepKind.EDGE_REJECTED in kinds
-
-    # Last step is always MST_COMPLETE
     assert steps[-1].kind == StepKind.MST_COMPLETE
 
-
-# ---------------------------------------------------------------------------
-# Step generators — Prim
-# ---------------------------------------------------------------------------
 
 def test_prim_steps():
     g = gen_demo_graph()
@@ -146,10 +119,7 @@ def test_prim_steps():
     assert len(steps) > 0
 
     kinds = [s.kind for s in steps]
-
-    # Prim adds each vertex one at a time
     assert StepKind.VERTEX_ADDED in kinds
 
-    # All 9 vertices must be added for the connected demo graph
     vertex_added_steps = [s for s in steps if s.kind == StepKind.VERTEX_ADDED]
     assert len(vertex_added_steps) == 9
