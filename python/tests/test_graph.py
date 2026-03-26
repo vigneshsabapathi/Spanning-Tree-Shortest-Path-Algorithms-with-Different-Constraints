@@ -20,7 +20,6 @@ def test_add_edge():
 
     assert g.num_edges == 5
 
-    # Each undirected edge appears in both adjacency lists
     dests_0 = {a.dest for a in g.adj[0]}
     assert 1 in dests_0
     assert 2 in dests_0
@@ -39,7 +38,6 @@ def test_block_vertex():
     assert g.vertex_blocked[2] is False
     g.block_vertex(2)
     assert g.vertex_blocked[2] is True
-    # Other vertices unaffected
     assert g.vertex_blocked[0] is False
     assert g.vertex_blocked[3] is False
 
@@ -52,19 +50,16 @@ def test_block_edge():
 
     g.block_edge(1, 2)
 
-    # The edge object in edge_list must be marked blocked
     blocked_edges = [e for e in g.edge_list if e.blocked]
     assert len(blocked_edges) == 1
     e = blocked_edges[0]
     assert (e.src, e.dest) == (1, 2) or (e.src, e.dest) == (2, 1)
 
-    # The adj entries for both endpoints must carry edge_blocked=True
     adj1_entry = next(a for a in g.adj[1] if a.dest == 2)
     adj2_entry = next(a for a in g.adj[2] if a.dest == 1)
     assert adj1_entry.edge_blocked is True
     assert adj2_entry.edge_blocked is True
 
-    # Unblocked edges must remain unblocked
     adj0_entry = next(a for a in g.adj[0] if a.dest == 1)
     assert adj0_entry.edge_blocked is False
 
@@ -76,8 +71,7 @@ def test_set_penalty():
 
     g.set_edge_penalty(0, 1, 3)
 
-    assert g.effective_weight(eid) == 18  # 6 * 3
+    assert g.effective_weight(eid) == 18
 
-    # Other edge unaffected (penalty=1)
     other_eid = g.edge_list[1].edge_id
-    assert g.effective_weight(other_eid) == 4  # 4 * 1
+    assert g.effective_weight(other_eid) == 4
