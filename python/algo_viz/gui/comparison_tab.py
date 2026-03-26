@@ -283,19 +283,16 @@ class ComparisonTab(QWidget):
         n1 = len(self._steps_1)
         n2 = len(self._steps_2)
 
-        # Show final states
         if self._steps_1:
             self._panel1.canvas.render_step(self._steps_1[-1])
         if self._steps_2:
             self._panel2.canvas.render_step(self._steps_2[-1])
 
-        # Panel info labels
         metric_label = "MST weight" if algo1 in ("Kruskal", "Prim") else "Max dist"
         self._panel1.set_info(f"{algo1} | {n1} steps | {metric_label}: {metric1}")
         metric_label2 = "MST weight" if algo2 in ("Kruskal", "Prim") else "Max dist"
         self._panel2.set_info(f"{algo2} | {n2} steps | {metric_label2}: {metric2}")
 
-        # Status bar comparison summary
         if algo1 in ("Kruskal", "Prim") and algo2 in ("Kruskal", "Prim"):
             match = "Match" if metric1 == metric2 else "Differ"
             self._status.setText(
@@ -308,7 +305,6 @@ class ComparisonTab(QWidget):
                 f"{algo2}: {n2} steps, max-dist={metric2}"
             )
 
-        # Position step index at the end
         self._step_idx = max(n1, n2) - 1
         self._exhausted_1 = True
         self._exhausted_2 = True
@@ -400,13 +396,11 @@ class ComparisonTab(QWidget):
 
     def _on_reset(self) -> None:
         self._stop_playback()
-        # Destroy old iterators
         if hasattr(self, "_iter1"):
             del self._iter1
         if hasattr(self, "_iter2"):
             del self._iter2
         self._clear_step_state()
-        # Re-render blank canvases with the current graph layout
         self._load_graph(self._graph_combo.currentText())
 
     def _update_step_label(self) -> None:
