@@ -11,7 +11,6 @@ INF = float("inf")
 
 
 def dijkstra_steps(graph: Graph, source: int) -> Iterator[AlgorithmStep]:
-    """Yield AlgorithmStep objects tracing Dijkstra's shortest-path algorithm."""
     dist: dict[int, float] = {v: INF for v in range(graph.num_vertices)}
     prev: dict[int, int] = {v: -1 for v in range(graph.num_vertices)}
     visited: set[int] = set()
@@ -47,7 +46,6 @@ def dijkstra_steps(graph: Graph, source: int) -> Iterator[AlgorithmStep]:
             v = adj.dest
             weight = adj.weight
 
-            # Skip already settled, blocked vertices, and blocked edges
             if v in visited or graph.vertex_blocked[v] or adj.edge_blocked:
                 continue
 
@@ -85,11 +83,6 @@ def dijkstra_steps(graph: Graph, source: int) -> Iterator[AlgorithmStep]:
 
 
 def dijkstra(graph: Graph, source: int) -> SPResult:
-    """Run Dijkstra's algorithm to completion and return the SPResult."""
-    dist: dict[int, float] = {}
-    prev: dict[int, int] = {}
-
-    # Re-run the core logic without generator overhead for clean result
     _dist: dict[int, float] = {v: INF for v in range(graph.num_vertices)}
     _prev: dict[int, int] = {v: -1 for v in range(graph.num_vertices)}
     visited: set[int] = set()
@@ -128,10 +121,6 @@ def dijkstra(graph: Graph, source: int) -> SPResult:
 
 
 def reconstruct_path(result: SPResult, target: int) -> list[int]:
-    """Walk prev from target back to source and return the path.
-
-    Returns an empty list if target is unreachable from source.
-    """
     if result.prev.get(target, -1) == -1 and target != result.source:
         return []
 
@@ -143,7 +132,6 @@ def reconstruct_path(result: SPResult, target: int) -> list[int]:
 
     path.reverse()
 
-    # Validate: path must start at source
     if not path or path[0] != result.source:
         return []
 
