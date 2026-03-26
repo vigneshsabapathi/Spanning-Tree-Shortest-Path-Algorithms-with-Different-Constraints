@@ -11,10 +11,7 @@ INF = float("inf")
 
 
 def dijkstra_obstacle_steps(graph: Graph, source: int) -> Iterator[AlgorithmStep]:
-    """Yield AlgorithmStep objects tracing Dijkstra with edge penalties (obstacle mode).
-
-    Effective edge weight = adj.weight * graph.edge_list[adj.edge_id].penalty.
-    """
+    # Effective edge weight = adj.weight * graph.edge_list[adj.edge_id].penalty
     dist: dict[int, float] = {v: INF for v in range(graph.num_vertices)}
     prev: dict[int, int] = {v: -1 for v in range(graph.num_vertices)}
     visited: set[int] = set()
@@ -50,7 +47,6 @@ def dijkstra_obstacle_steps(graph: Graph, source: int) -> Iterator[AlgorithmStep
             v = adj.dest
             weight = adj.weight
 
-            # Skip already settled, blocked vertices, and blocked edges
             if v in visited or graph.vertex_blocked[v] or adj.edge_blocked:
                 continue
 
@@ -90,7 +86,6 @@ def dijkstra_obstacle_steps(graph: Graph, source: int) -> Iterator[AlgorithmStep
 
 
 def dijkstra_obstacle(graph: Graph, source: int) -> SPResult:
-    """Run obstacle-aware Dijkstra to completion and return the SPResult."""
     _dist: dict[int, float] = {v: INF for v in range(graph.num_vertices)}
     _prev: dict[int, int] = {v: -1 for v in range(graph.num_vertices)}
     visited: set[int] = set()
