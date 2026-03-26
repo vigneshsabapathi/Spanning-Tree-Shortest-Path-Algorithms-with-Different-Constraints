@@ -3,12 +3,6 @@
 #include <stdlib.h>
 #include <string.h>
 
-/* ---------------------------------------------------------------------------
- * graph_create
- * Allocate a Graph with num_vertices vertices and an initial edge capacity
- * of 16.  All adjacency list heads are NULL, no vertices are blocked, and
- * every edge penalty defaults to 1 (set at add-time).
- * --------------------------------------------------------------------------- */
 Graph *graph_create(int num_vertices)
 {
     if (num_vertices <= 0 || num_vertices > MAX_VERTICES) {
@@ -31,7 +25,6 @@ Graph *graph_create(int num_vertices)
         fprintf(stderr, "graph_create: failed to allocate adj array\n");
         exit(1);
     }
-    /* calloc zeroes memory; head pointers are already NULL */
 
     g->edge_list = (Edge *)malloc(g->edge_capacity * sizeof(Edge));
     if (!g->edge_list) {
@@ -54,11 +47,6 @@ Graph *graph_create(int num_vertices)
     return g;
 }
 
-/* ---------------------------------------------------------------------------
- * graph_destroy
- * Free every AdjNode in every adjacency list, then the adj array, then the
- * remaining dynamically allocated arrays, and finally the Graph itself.
- * --------------------------------------------------------------------------- */
 void graph_destroy(Graph *g)
 {
     if (!g) return;
@@ -79,10 +67,7 @@ void graph_destroy(Graph *g)
     free(g);
 }
 
-/* ---------------------------------------------------------------------------
- * Internal helper: grow edge_list and edge_penalty to double their current
- * capacity.
- * --------------------------------------------------------------------------- */
+/* Double edge_list and edge_penalty capacity. */
 static void grow_edge_storage(Graph *g)
 {
     int new_cap = g->edge_capacity * 2;
@@ -104,9 +89,6 @@ static void grow_edge_storage(Graph *g)
     g->edge_capacity = new_cap;
 }
 
-/* ---------------------------------------------------------------------------
- * Internal helper: allocate and initialise a new AdjNode.
- * --------------------------------------------------------------------------- */
 static AdjNode *make_adj_node(int dest, int weight, int edge_id)
 {
     AdjNode *node = (AdjNode *)malloc(sizeof(AdjNode));
@@ -122,14 +104,6 @@ static AdjNode *make_adj_node(int dest, int weight, int edge_id)
     return node;
 }
 
-/* ---------------------------------------------------------------------------
- * graph_add_edge
- * Add an undirected weighted edge between src and dest.
- *  - Prepend an AdjNode to adj[src] and adj[dest].
- *  - Record one Edge entry in edge_list.
- *  - Grow storage if needed (doubling strategy).
- *  - Default edge_penalty is 1.
- * --------------------------------------------------------------------------- */
 void graph_add_edge(Graph *g, int src, int dest, int weight)
 {
     if (!g) return;
@@ -142,29 +116,22 @@ void graph_add_edge(Graph *g, int src, int dest, int weight)
         exit(1);
     }
 
-    /* Grow storage before we need it */
-    if (g->num_edges >= g->edge_capacity) {
+    if (g->num_edges >= g->edge_capacity)
         grow_edge_storage(g);
-    }
 
     int edge_id = g->num_edges;
 
-    /* Populate the Edge record */
     g->edge_list[edge_id].src     = src;
     g->edge_list[edge_id].dest    = dest;
     g->edge_list[edge_id].weight  = weight;
     g->edge_list[edge_id].edge_id = edge_id;
     g->edge_list[edge_id].blocked = false;
+    g->edge_penalty[edge_id]      = 1;
 
-    /* Default penalty */
-    g->edge_penalty[edge_id] = 1;
-
-    /* Prepend AdjNode to adj[src] */
     AdjNode *fwd = make_adj_node(dest, weight, edge_id);
     fwd->next         = g->adj[src].head;
     g->adj[src].head  = fwd;
 
-    /* Prepend AdjNode to adj[dest] (undirected) */
     AdjNode *rev = make_adj_node(src, weight, edge_id);
     rev->next         = g->adj[dest].head;
     g->adj[dest].head = rev;
@@ -172,9 +139,6 @@ void graph_add_edge(Graph *g, int src, int dest, int weight)
     g->num_edges++;
 }
 
-/* ---------------------------------------------------------------------------
- * graph_block_vertex / graph_unblock_vertex
- * --------------------------------------------------------------------------- */
 void graph_block_vertex(Graph *g, int v)
 {
     if (!g) return;
@@ -195,11 +159,6 @@ void graph_unblock_vertex(Graph *g, int v)
     g->vertex_blocked[v] = false;
 }
 
-/* ---------------------------------------------------------------------------
- * graph_block_edge
- * Find the edge by src/dest (either direction), mark the Edge as blocked,
- * and mark the corresponding AdjNodes in both adjacency lists as blocked.
- * --------------------------------------------------------------------------- */
 void graph_block_edge(Graph *g, int src, int dest)
 {
     if (!g) return;
@@ -212,7 +171,6 @@ void graph_block_edge(Graph *g, int src, int dest)
         exit(1);
     }
 
-    /* Find the edge in edge_list (check both directions) */
     int edge_id = -1;
     for (int i = 0; i < g->num_edges; i++) {
         Edge *e = &g->edge_list[i];
@@ -229,7 +187,6 @@ void graph_block_edge(Graph *g, int src, int dest)
         return;
     }
 
-    /* Mark AdjNode in adj[src] that points to dest */
     for (AdjNode *cur = g->adj[src].head; cur; cur = cur->next) {
         if (cur->dest == dest && cur->edge_id == edge_id) {
             cur->edge_blocked = true;
@@ -237,7 +194,6 @@ void graph_block_edge(Graph *g, int src, int dest)
         }
     }
 
-    /* Mark AdjNode in adj[dest] that points to src */
     for (AdjNode *cur = g->adj[dest].head; cur; cur = cur->next) {
         if (cur->dest == src && cur->edge_id == edge_id) {
             cur->edge_blocked = true;
@@ -246,11 +202,6 @@ void graph_block_edge(Graph *g, int src, int dest)
     }
 }
 
-/* ---------------------------------------------------------------------------
- * graph_set_edge_penalty
- * Find the edge by src/dest (either direction), update edge_penalty, and
- * synchronise the weight field on both AdjNodes to reflect the new penalty.
- * --------------------------------------------------------------------------- */
 void graph_set_edge_penalty(Graph *g, int src, int dest, int penalty)
 {
     if (!g) return;
@@ -280,7 +231,6 @@ void graph_set_edge_penalty(Graph *g, int src, int dest, int penalty)
 
     g->edge_penalty[edge_id] = penalty;
 
-    /* Update AdjNode in adj[src] pointing to dest */
     for (AdjNode *cur = g->adj[src].head; cur; cur = cur->next) {
         if (cur->dest == dest && cur->edge_id == edge_id) {
             cur->weight = penalty;
@@ -288,7 +238,6 @@ void graph_set_edge_penalty(Graph *g, int src, int dest, int penalty)
         }
     }
 
-    /* Update AdjNode in adj[dest] pointing to src */
     for (AdjNode *cur = g->adj[dest].head; cur; cur = cur->next) {
         if (cur->dest == src && cur->edge_id == edge_id) {
             cur->weight = penalty;
@@ -297,12 +246,6 @@ void graph_set_edge_penalty(Graph *g, int src, int dest, int penalty)
     }
 }
 
-/* ---------------------------------------------------------------------------
- * graph_print
- * Print the adjacency list for every vertex in the format:
- *   [v]: dest(weight,eid) -> dest(weight,eid) -> ... -> NULL
- * Blocked vertices and blocked edges are annotated.
- * --------------------------------------------------------------------------- */
 void graph_print(const Graph *g)
 {
     if (!g) return;
@@ -320,9 +263,6 @@ void graph_print(const Graph *g)
     }
 }
 
-/* ---------------------------------------------------------------------------
- * graph_edge_count
- * --------------------------------------------------------------------------- */
 int graph_edge_count(const Graph *g)
 {
     if (!g) return 0;
