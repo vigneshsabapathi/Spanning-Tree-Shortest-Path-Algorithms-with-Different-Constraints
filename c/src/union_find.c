@@ -39,13 +39,11 @@ void uf_destroy(UnionFind *uf) {
 }
 
 int uf_find(UnionFind *uf, int x) {
-    /* Walk up to find root */
     int root = x;
-    while (uf->parent[root] != root) {
+    while (uf->parent[root] != root)
         root = uf->parent[root];
-    }
 
-    /* Path compression: point every node along the path directly to root */
+    /* Path compression */
     while (uf->parent[x] != root) {
         int next = uf->parent[x];
         uf->parent[x] = root;
@@ -61,13 +59,11 @@ bool uf_union(UnionFind *uf, int x, int y) {
 
     if (rx == ry) return false;
 
-    /* Union by rank: attach shorter tree under taller tree's root */
     if (uf->rank[rx] < uf->rank[ry]) {
         uf->parent[rx] = ry;
     } else if (uf->rank[rx] > uf->rank[ry]) {
         uf->parent[ry] = rx;
     } else {
-        /* Equal rank: pick rx as new root and increment its rank */
         uf->parent[ry] = rx;
         uf->rank[rx]++;
     }
