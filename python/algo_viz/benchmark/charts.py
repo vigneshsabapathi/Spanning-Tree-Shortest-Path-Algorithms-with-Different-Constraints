@@ -17,7 +17,6 @@ _TEXT    = "#e0e0f0"   # axis / title text
 
 
 def _apply_dark_style(fig: Figure, ax) -> None:
-    """Apply a consistent dark theme to a figure and its axes."""
     fig.patch.set_facecolor(_BG)
     ax.set_facecolor(_BG)
     ax.tick_params(colors=_TEXT, which="both")
@@ -32,7 +31,6 @@ def _apply_dark_style(fig: Figure, ax) -> None:
 
 def create_mst_chart(results: list[BenchmarkEntry]) -> Figure:
     """Grouped bar chart: Kruskal (green) vs Prim (blue) timing by graph size."""
-    # Separate entries
     kruskal_entries = [r for r in results if r.algorithm == "Kruskal"]
     prim_entries    = [r for r in results if r.algorithm == "Prim"]
 
@@ -51,7 +49,6 @@ def create_mst_chart(results: list[BenchmarkEntry]) -> Figure:
     bars_p = ax.bar(x + width / 2, p_times, width, label="Prim",
                     color=_COLOR_B, alpha=0.88, edgecolor="white", linewidth=0.5)
 
-    # Annotate bars with values when small enough to be readable
     for bar in list(bars_k) + list(bars_p):
         h = bar.get_height()
         if h > 0:
@@ -65,7 +62,6 @@ def create_mst_chart(results: list[BenchmarkEntry]) -> Figure:
                 fontsize=7, color=_TEXT,
             )
 
-    # Use log scale when range is large (>100x)
     if k_times and p_times:
         all_times = k_times + p_times
         if max(all_times) / max(min(all_times), 1e-9) > 100:
