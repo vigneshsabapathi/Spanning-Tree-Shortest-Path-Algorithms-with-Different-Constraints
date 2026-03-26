@@ -33,7 +33,6 @@ class ControlPanel(QWidget):
         row1 = QHBoxLayout()
         row1.setSpacing(8)
 
-        graph_label = QLabel("Graph:")
         self._graph_combo = QComboBox()
         self._graph_combo.addItems([
             "Demo 9V",
@@ -42,7 +41,6 @@ class ControlPanel(QWidget):
             "Obstacle Grid 5x5",
         ])
 
-        algo_label = QLabel("Algorithm:")
         self._algo_combo = QComboBox()
         self._algo_combo.addItems([
             "Kruskal",
@@ -51,10 +49,10 @@ class ControlPanel(QWidget):
             "Dijkstra Obstacle",
         ])
 
-        row1.addWidget(graph_label)
+        row1.addWidget(QLabel("Graph:"))
         row1.addWidget(self._graph_combo)
         row1.addSpacing(16)
-        row1.addWidget(algo_label)
+        row1.addWidget(QLabel("Algorithm:"))
         row1.addWidget(self._algo_combo)
         row1.addStretch()
 
@@ -82,7 +80,6 @@ class ControlPanel(QWidget):
         self._btn_jump_end.setFixedWidth(36)
         self._btn_jump_end.setToolTip("Jump to end")
 
-        speed_label = QLabel("Speed:")
         self._speed_slider = QSlider(Qt.Orientation.Horizontal)
         self._speed_slider.setRange(self._SPEED_MIN, self._SPEED_MAX)
         self._speed_slider.setValue(2)          # default: 1.0x
@@ -100,7 +97,7 @@ class ControlPanel(QWidget):
         row2.addWidget(self._btn_step_fwd)
         row2.addWidget(self._btn_jump_end)
         row2.addSpacing(12)
-        row2.addWidget(speed_label)
+        row2.addWidget(QLabel("Speed:"))
         row2.addWidget(self._speed_slider)
         row2.addWidget(self._speed_value_label)
         row2.addSpacing(16)
@@ -110,7 +107,6 @@ class ControlPanel(QWidget):
         outer.addLayout(row1)
         outer.addLayout(row2)
 
-        # ── Wire internal signals ────────────────────────────────────────
         self._btn_jump_start.clicked.connect(self.jump_start)
         self._btn_step_back.clicked.connect(self.step_backward)
         self._btn_play_pause.clicked.connect(self._on_play_pause)
