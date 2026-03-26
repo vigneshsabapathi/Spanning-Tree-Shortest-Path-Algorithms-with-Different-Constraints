@@ -4,16 +4,10 @@
 #include <stdlib.h>
 #include <string.h>
 
-/* ---------- static comparator for qsort ---------- */
-
 static int edge_cmp_weight(const void *a, const void *b)
 {
-    const Edge *ea = (const Edge *)a;
-    const Edge *eb = (const Edge *)b;
-    return ea->weight - eb->weight;
+    return ((const Edge *)a)->weight - ((const Edge *)b)->weight;
 }
-
-/* ---------- Kruskal's MST ---------- */
 
 MSTResult mst_kruskal(const Graph *g)
 {
@@ -34,17 +28,14 @@ MSTResult mst_kruskal(const Graph *g)
         return result;
     memcpy(work, g->edge_list, (size_t)edge_count * sizeof(Edge));
 
-    /* Sort by weight */
     qsort(work, (size_t)edge_count, sizeof(Edge), edge_cmp_weight);
 
-    /* Union-Find over all vertices */
     UnionFind *uf = uf_create(g->num_vertices);
     if (!uf) {
         free(work);
         return result;
     }
 
-    /* Pre-allocate result edge array (MST has at most V-1 edges) */
     int max_mst_edges = g->num_vertices - 1;
     if (max_mst_edges < 0)
         max_mst_edges = 0;
@@ -56,11 +47,9 @@ MSTResult mst_kruskal(const Graph *g)
         return result;
     }
 
-    /* Main Kruskal loop */
     for (int i = 0; i < edge_count && result.num_edges < max_mst_edges; i++) {
         Edge *e = &work[i];
 
-        /* Skip blocked edges or vertices */
         if (e->blocked)
             continue;
         if (g->vertex_blocked && (g->vertex_blocked[e->src] || g->vertex_blocked[e->dest]))
@@ -83,8 +72,6 @@ MSTResult mst_kruskal(const Graph *g)
 
     return result;
 }
-
-/* ---------- Shared utility functions ---------- */
 
 void mst_result_free(MSTResult *r)
 {
