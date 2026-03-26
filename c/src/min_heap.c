@@ -2,8 +2,6 @@
 #include <stdlib.h>
 #include "min_heap.h"
 
-/* ---------- static helpers ---------- */
-
 static void swap(MinHeap *h, int i, int j) {
     HeapNode tmp = h->data[i];
     h->data[i]   = h->data[j];
@@ -46,8 +44,6 @@ static void sift_down(MinHeap *h, int i) {
     }
 }
 
-/* ---------- public API ---------- */
-
 MinHeap *heap_create(int capacity) {
     MinHeap *h = malloc(sizeof(MinHeap));
     if (!h) { fprintf(stderr, "heap_create: malloc failed\n"); exit(1); }
@@ -88,8 +84,6 @@ HeapNode heap_extract_min(MinHeap *h) {
     int last = h->size - 1;
     swap(h, 0, last);
     h->size--;
-
-    /* mark extracted value as not present */
     h->pos[min.value] = -1;
 
     if (h->size > 0)
