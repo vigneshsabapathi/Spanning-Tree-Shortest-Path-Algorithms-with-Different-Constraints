@@ -18,10 +18,6 @@
 #include "graph_gen.h"
 #include "benchmark.h"
 
-/* ------------------------------------------------------------------ */
-/* Usage                                                               */
-/* ------------------------------------------------------------------ */
-
 static void print_usage(void)
 {
     printf("Usage: ./algo [mode] [options]\n");
@@ -32,11 +28,6 @@ static void print_usage(void)
     printf("  path   - Run shortest path (-v vertices -d density -s src -t target)\n");
 }
 
-/* ------------------------------------------------------------------ */
-/* Helpers                                                             */
-/* ------------------------------------------------------------------ */
-
-/* Print a reconstructed path returned by sp_reconstruct_path(). */
 static void print_path(const int *path, int len)
 {
     if (path == NULL || len == 0) {
@@ -50,10 +41,6 @@ static void print_path(const int *path, int len)
     }
     printf("\n");
 }
-
-/* ------------------------------------------------------------------ */
-/* run_demo                                                            */
-/* ------------------------------------------------------------------ */
 
 /*
  * Classic 9-vertex Kruskal/Prim textbook graph.
@@ -71,7 +58,6 @@ static void run_demo(void)
     printf("  DEMO — Classic 9-vertex textbook graph\n");
     printf("=======================================================\n\n");
 
-    /* Build the graph -------------------------------------------- */
     Graph *g = graph_create(9);
 
     graph_add_edge(g, 0, 1,  4);
@@ -93,19 +79,16 @@ static void run_demo(void)
     graph_print(g);
     printf("\n");
 
-    /* MST: Kruskal ----------------------------------------------- */
     printf("--- Kruskal MST ---\n");
     MSTResult kruskal = mst_kruskal(g);
     mst_result_print(&kruskal, "Kruskal");
     printf("  Expected MST weight: 37\n\n");
 
-    /* MST: Prim -------------------------------------------------- */
     printf("--- Prim MST (start = 0) ---\n");
     MSTResult prim = mst_prim(g, 0);
     mst_result_print(&prim, "Prim");
     printf("\n");
 
-    /* Compare results -------------------------------------------- */
     if (mst_results_equal(&kruskal, &prim)) {
         printf("Kruskal and Prim produced the SAME MST weight. [OK]\n\n");
     } else {
@@ -115,7 +98,6 @@ static void run_demo(void)
     mst_result_free(&kruskal);
     mst_result_free(&prim);
 
-    /* Shortest path: Dijkstra from 0 ----------------------------- */
     printf("--- Dijkstra from vertex 0 ---\n");
     SPResult sp = sp_dijkstra(g, 0);
     sp_result_print(&sp, 4);
@@ -129,7 +111,6 @@ static void run_demo(void)
 
     sp_result_free(&sp);
 
-    /* Block vertex 2, re-run Dijkstra ---------------------------- */
     printf("--- Dijkstra from vertex 0 (vertex 2 blocked) ---\n");
     graph_block_vertex(g, 2);
 
@@ -146,10 +127,8 @@ static void run_demo(void)
     sp_result_free(&sp_blocked);
     graph_unblock_vertex(g, 2);
 
-    /* Obstacle Dijkstra with edge penalties ---------------------- */
     printf("--- Obstacle-aware Dijkstra from vertex 0 (with penalties) ---\n");
 
-    /* Add penalties to a couple of edges to demonstrate the feature. */
     graph_set_edge_penalty(g, 0, 7, 50);   /* make the 0-7 shortcut expensive */
     graph_set_edge_penalty(g, 1, 7, 30);
 
@@ -165,17 +144,12 @@ static void run_demo(void)
 
     sp_result_free(&sp_obs);
 
-    /* Clean up --------------------------------------------------- */
     graph_destroy(g);
 
     printf("=======================================================\n");
     printf("  DEMO complete.\n");
     printf("=======================================================\n\n");
 }
-
-/* ------------------------------------------------------------------ */
-/* run_mst                                                             */
-/* ------------------------------------------------------------------ */
 
 static void run_mst(int vertices, double density)
 {
@@ -191,13 +165,11 @@ static void run_mst(int vertices, double density)
 
     printf("Graph: %d vertices, %d edges\n\n", g->num_vertices, g->num_edges);
 
-    /* Kruskal */
     printf("--- Kruskal MST ---\n");
     MSTResult kruskal = mst_kruskal(g);
     mst_result_print(&kruskal, "Kruskal");
     printf("\n");
 
-    /* Prim */
     printf("--- Prim MST (start = 0) ---\n");
     MSTResult prim = mst_prim(g, 0);
     mst_result_print(&prim, "Prim");
@@ -218,10 +190,6 @@ static void run_mst(int vertices, double density)
     printf("=======================================================\n\n");
 }
 
-/* ------------------------------------------------------------------ */
-/* run_path                                                            */
-/* ------------------------------------------------------------------ */
-
 static void run_path(int vertices, double density, int src, int target)
 {
     printf("=======================================================\n");
@@ -235,7 +203,6 @@ static void run_path(int vertices, double density, int src, int target)
         return;
     }
 
-    /* Validate src / target are in range. */
     if (src < 0 || src >= g->num_vertices) {
         fprintf(stderr, "Error: src vertex %d out of range [0, %d).\n",
                 src, g->num_vertices);
@@ -251,9 +218,7 @@ static void run_path(int vertices, double density, int src, int target)
 
     printf("Graph: %d vertices, %d edges\n\n", g->num_vertices, g->num_edges);
 
-    /* Apply some deterministic penalties to a handful of edges so  */
-    /* the obstacle variant has something to work with.              */
-    /* We pick edges whose src index is a multiple of 7.            */
+    /* Apply deterministic penalties to edges whose src is a multiple of 7. */
     for (int i = 0; i < g->num_edges; i++) {
         if (g->edge_list[i].src % 7 == 0) {
             graph_set_edge_penalty(g,
@@ -263,7 +228,6 @@ static void run_path(int vertices, double density, int src, int target)
         }
     }
 
-    /* Standard Dijkstra ------------------------------------------ */
     printf("--- Dijkstra (standard) from %d ---\n", src);
     SPResult sp = sp_dijkstra(g, src);
     sp_result_print(&sp, target);
@@ -277,7 +241,6 @@ static void run_path(int vertices, double density, int src, int target)
 
     sp_result_free(&sp);
 
-    /* Obstacle-aware Dijkstra ------------------------------------ */
     printf("--- Dijkstra (obstacle-aware) from %d ---\n", src);
     SPResult sp_obs = sp_dijkstra_obstacle(g, src);
     sp_result_print(&sp_obs, target);
@@ -297,10 +260,6 @@ static void run_path(int vertices, double density, int src, int target)
     printf("=======================================================\n\n");
 }
 
-/* ------------------------------------------------------------------ */
-/* main                                                                */
-/* ------------------------------------------------------------------ */
-
 int main(int argc, char *argv[])
 {
     if (argc < 2) {
@@ -310,13 +269,11 @@ int main(int argc, char *argv[])
 
     const char *mode = argv[1];
 
-    /* Shared option defaults */
     int    vertices = 100;
     double density  = 0.3;
     int    src      = 0;
     int    target   = -1;          /* resolved to vertices-1 after parsing */
 
-    /* Manual option parsing: scan argv[2..argc-1] for flag / value pairs */
     for (int i = 2; i < argc - 1; i++) {
         if (strcmp(argv[i], "-v") == 0) {
             vertices = atoi(argv[++i]);
@@ -329,12 +286,9 @@ int main(int argc, char *argv[])
         }
     }
 
-    /* Resolve default target now that vertices is known. */
-    if (target < 0) {
+    if (target < 0)
         target = vertices - 1;
-    }
 
-    /* Dispatch --------------------------------------------------- */
     if (strcmp(mode, "demo") == 0) {
         run_demo();
     } else if (strcmp(mode, "bench") == 0) {
