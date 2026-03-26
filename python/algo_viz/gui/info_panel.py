@@ -76,7 +76,6 @@ class InfoPanel(QWidget):
         self._desc_label.setText(step.explanation)
         self._stat_step_kind.setText(f"Step kind: {step.kind.name}")
 
-        # Build state text
         state_lines = []
 
         if step.union_find_state:
@@ -90,7 +89,6 @@ class InfoPanel(QWidget):
 
         self._state_edit.setPlainText("\n".join(state_lines))
 
-        # Statistics
         if step.mst_edges:
             self._stat_edges.setText(f"Edges in MST: {len(step.mst_edges)}")
         else:
@@ -103,7 +101,6 @@ class InfoPanel(QWidget):
         else:
             self._stat_settled.setText("Vertices settled: 0")
 
-        # Total weight / distance
         if step.distances:
             reachable = [d for d in step.distances.values() if d >= 0]
             if reachable:
