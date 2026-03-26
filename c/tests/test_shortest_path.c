@@ -10,7 +10,6 @@ int main(void) {
     /*
      * 5-vertex undirected graph:
      *   0-1(10), 0-2(3), 1-3(2), 2-1(4), 2-3(8), 2-4(2), 3-4(5)
-     * Since graph is undirected, each call adds edges in both directions.
      */
     Graph *g = graph_create(5);
     ASSERT(g != NULL, "graph_create returned NULL");
@@ -24,7 +23,6 @@ int main(void) {
     graph_add_edge(g, 3, 4, 5);
     PASS("built 5-vertex graph");
 
-    /* Run sp_dijkstra from source 0 */
     SPResult r = sp_dijkstra(g, 0);
     ASSERT(r.dist[0] == 0,  "dist[0] should be 0");
     ASSERT(r.dist[2] == 3,  "dist[2] should be 3 (0->2)");
@@ -33,7 +31,6 @@ int main(void) {
     ASSERT(r.dist[4] == 5,  "dist[4] should be 5 (0->2->4, cost 3+2)");
     PASS("dijkstra from 0: dist[] values correct");
 
-    /* Reconstruct path to 3: expect [0, 2, 1, 3], path_len==4 */
     int path_len = 0;
     int *path = sp_reconstruct_path(&r, 3, &path_len);
     ASSERT(path != NULL,      "reconstructed path should not be NULL");
@@ -47,7 +44,6 @@ int main(void) {
 
     sp_result_free(&r);
 
-    /* Test with blocked vertex 2 */
     graph_block_vertex(g, 2);
     SPResult r2 = sp_dijkstra(g, 0);
     ASSERT(r2.dist[1] == 10, "with vertex 2 blocked, dist[1] should be 10 (direct 0->1)");
@@ -57,11 +53,7 @@ int main(void) {
     sp_result_free(&r2);
     graph_unblock_vertex(g, 2);
 
-    /* Test obstacle dijkstra: set penalty on edge 0-2 so effective weight = 3 + 3*penalty.
-     * With penalty=10, edge weight effectively becomes 3 + 3*10 = 33 (or similar large value),
-     * so dijkstra_obstacle should prefer 0->1 (cost 10) over 0->2->1 (penalized).
-     * Set penalty=10 on edge 0-2 to make dist[1]=10 (direct 0->1 preferred).
-     */
+    /* penalty=10 makes 0->2->1 cost 3*10+4*10=70, so direct 0->1(10) wins */
     graph_set_edge_penalty(g, 0, 2, 10);
     SPResult r3 = sp_dijkstra_obstacle(g, 0);
     ASSERT(r3.dist[1] == 10, "obstacle dijkstra: dist[1] should be 10 (direct 0->1 preferred over penalized 0->2->1)");
@@ -69,7 +61,6 @@ int main(void) {
 
     sp_result_free(&r3);
 
-    /* Destroy graph */
     graph_destroy(g);
     PASS("graph_destroy completed");
 
