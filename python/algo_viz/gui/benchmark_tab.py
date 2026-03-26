@@ -80,7 +80,6 @@ class _ChartHolder(QWidget):
         self._canvas: FigureCanvasQTAgg | None = None
 
     def set_figure(self, fig) -> None:
-        # Remove old canvas
         if self._canvas is not None:
             self._layout.removeWidget(self._canvas)
             self._canvas.setParent(None)  # type: ignore[call-arg]
@@ -222,13 +221,9 @@ class BenchmarkTab(QWidget):
         mst_results: list[BenchmarkEntry],
         sp_results: list[BenchmarkEntry],
     ) -> None:
-        # Render charts
-        mst_fig = create_mst_chart(mst_results)
-        sp_fig  = create_sp_chart(sp_results)
-        self._mst_chart_holder.set_figure(mst_fig)
-        self._sp_chart_holder.set_figure(sp_fig)
+        self._mst_chart_holder.set_figure(create_mst_chart(mst_results))
+        self._sp_chart_holder.set_figure(create_sp_chart(sp_results))
 
-        # Render table
         all_results = mst_results + sp_results
         # Sort by vertices then algorithm name for a tidy table
         all_results.sort(key=lambda r: (r.vertices, r.algorithm))
