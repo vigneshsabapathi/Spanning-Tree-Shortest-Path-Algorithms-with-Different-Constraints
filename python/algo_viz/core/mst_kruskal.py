@@ -9,8 +9,6 @@ from algo_viz.models.step import AlgorithmStep, StepKind
 
 
 def kruskal_steps(graph: Graph) -> Iterator[AlgorithmStep]:
-    """Yield AlgorithmStep objects tracing Kruskal's MST algorithm."""
-    # Sort non-blocked edges by weight
     sorted_edges = sorted(
         (e for e in graph.edge_list if not e.blocked),
         key=lambda e: e.weight,
@@ -21,7 +19,6 @@ def kruskal_steps(graph: Graph) -> Iterator[AlgorithmStep]:
     step = 0
 
     for edge in sorted_edges:
-        # Skip if either endpoint is blocked
         if graph.vertex_blocked[edge.src] or graph.vertex_blocked[edge.dest]:
             continue
 
@@ -31,9 +28,7 @@ def kruskal_steps(graph: Graph) -> Iterator[AlgorithmStep]:
             active_edges=frozenset({edge.edge_id}),
             mst_edges=frozenset(mst_edges),
             union_find_state=uf.snapshot(),
-            explanation=(
-                f"Considering edge {edge.src}-{edge.dest} (weight {edge.weight})"
-            ),
+            explanation=f"Considering edge {edge.src}-{edge.dest} (weight {edge.weight})",
             step_number=step,
         )
 
@@ -71,7 +66,6 @@ def kruskal_steps(graph: Graph) -> Iterator[AlgorithmStep]:
 
 
 def kruskal(graph: Graph) -> MSTResult:
-    """Run Kruskal's algorithm to completion and return the MST result."""
     last_step: AlgorithmStep | None = None
     for last_step in kruskal_steps(graph):
         pass
