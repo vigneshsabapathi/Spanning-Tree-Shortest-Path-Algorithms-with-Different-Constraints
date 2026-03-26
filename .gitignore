@@ -1,6 +1,15 @@
-obj/
-bin/
+# C build artifacts
+c/obj/
+c/bin/
 *.o
 *.d
 *.dSYM/
+
+# Python
+python/venv/
+__pycache__/
+*.pyc
+.pytest_cache/
+
+# OS
 .DS_Store
