@@ -27,7 +27,6 @@ SPResult sp_dijkstra(const Graph *g, int source)
 
     MinHeap *heap = heap_create(V);
 
-    /* Insert all non-blocked vertices; blocked ones stay at INF and are never relaxed */
     for (int v = 0; v < V; v++) {
         if (!g->vertex_blocked[v]) {
             heap_insert(heap, result.dist[v], v);
@@ -35,8 +34,7 @@ SPResult sp_dijkstra(const Graph *g, int source)
     }
 
     while (!heap_is_empty(heap)) {
-        HeapNode node = heap_extract_min(heap);
-        int u         = node.value;
+        int u = heap_extract_min(heap).value;
 
         if (result.dist[u] == INF) {
             break;
@@ -52,8 +50,6 @@ SPResult sp_dijkstra(const Graph *g, int source)
             if (adj->edge_blocked)   continue;
 
             int weight = adj->weight;
-
-            /* Overflow guard */
             if (result.dist[u] > INF - weight) continue;
 
             int new_dist = result.dist[u] + weight;
@@ -90,7 +86,6 @@ int *sp_reconstruct_path(const SPResult *r, int target, int *path_len)
         return NULL;
     }
 
-    /* Count path length */
     int len = 0;
     for (int v = target; v != -1; v = r->prev[v]) {
         len++;
