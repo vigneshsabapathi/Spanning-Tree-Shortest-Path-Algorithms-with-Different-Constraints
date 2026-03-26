@@ -1,0 +1,6 @@
+PyQt6>=6.7.0
+matplotlib>=3.9.0
+networkx>=3.3
+numpy>=2.1.0
+scipy>=1.13.0
+pytest>=8.0.0
