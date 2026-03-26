@@ -73,12 +73,10 @@ def gen_connected_graph(
     shuffled = list(range(n))
     random.shuffle(shuffled)
 
-    # Build spanning tree
     for i in range(n - 1):
         weight = random.randint(1, max_weight)
         g.add_edge(shuffled[i], shuffled[i + 1], weight)
 
-    # Collect candidate extra edges (pairs not yet connected)
     existing: set[tuple[int, int]] = set()
     for edge in g.edge_list:
         u, v = min(edge.src, edge.dest), max(edge.src, edge.dest)
@@ -122,11 +120,9 @@ def gen_grid_graph(
     for r in range(rows):
         for c in range(cols):
             v = r * cols + c
-            # Connect right
             if c + 1 < cols:
                 weight = random.randint(1, max_weight)
                 g.add_edge(v, v + 1, weight)
-            # Connect down
             if r + 1 < rows:
                 weight = random.randint(1, max_weight)
                 g.add_edge(v, v + cols, weight)
@@ -153,14 +149,12 @@ def gen_obstacle_graph(
     g = gen_grid_graph(rows, cols, max_weight, seed)
 
     n = rows * cols
-    # Interior vertices: all except 0 and n-1
-    interior = [v for v in range(1, n - 1)]
+    interior = list(range(1, n - 1))
     num_blocked = max(1, int(obstacle_fraction * len(interior)))
     random.shuffle(interior)
     for v in interior[:num_blocked]:
         g.block_vertex(v)
 
-    # Apply random penalties to ~20% of edges
     for edge in g.edge_list:
         if random.random() < 0.2:
             penalty = random.randint(2, 5)
