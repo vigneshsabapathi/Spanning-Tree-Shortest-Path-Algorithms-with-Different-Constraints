@@ -22,7 +22,6 @@ MSTResult mst_prim(const Graph *g, int start_vertex) {
 
     MinHeap *heap = heap_create(V);
 
-    /* Insert all non-blocked vertices; start_vertex gets key 0, rest get INF */
     for (int v = 0; v < V; v++) {
         if (!g->vertex_blocked[v]) {
             heap_insert(heap, dist[v], v);
@@ -30,17 +29,13 @@ MSTResult mst_prim(const Graph *g, int start_vertex) {
     }
 
     while (!heap_is_empty(heap)) {
-        HeapNode node = heap_extract_min(heap);
-        int u         = node.value;
+        int u = heap_extract_min(heap).value;
 
-        /* All remaining vertices are unreachable */
-        if (dist[u] == INF) {
+        if (dist[u] == INF)
             break;
-        }
 
         in_mst[u] = true;
 
-        /* Relax edges from u */
         for (AdjNode *adj = g->adj[u].head; adj != NULL; adj = adj->next) {
             int v      = adj->dest;
             int weight = adj->weight;
@@ -58,7 +53,6 @@ MSTResult mst_prim(const Graph *g, int start_vertex) {
         }
     }
 
-    /* Build MSTResult */
     int num_mst_edges = 0;
     for (int v = 0; v < V; v++) {
         if (parent[v] != -1 && v != start_vertex) {
@@ -82,7 +76,6 @@ MSTResult mst_prim(const Graph *g, int start_vertex) {
         }
     }
 
-    /* Count unblocked vertices to determine expected edge count */
     int unblocked = 0;
     for (int v = 0; v < V; v++) {
         if (!g->vertex_blocked[v]) {
