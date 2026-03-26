@@ -159,8 +159,6 @@ class VisualizerTab(QWidget):
 
     def _on_play(self) -> None:
         if not self.worker.isRunning():
-            # Re-create iterator from the current position (skip already-seen steps)
-            # The worker runs its own iterator; re-use the same one unless exhausted.
             if self._exhausted and self.current_index >= len(self.steps_cache) - 1:
                 return  # nothing left to play
             self.worker.set_iterator(self._create_fresh_iterator_from(
@@ -176,7 +174,6 @@ class VisualizerTab(QWidget):
         it = self._create_iterator(self._current_algo_name)
         if it is None:
             return None
-        # Skip steps already in cache (they were yielded previously)
         for _ in range(skip_count):
             try:
                 next(it)
@@ -189,7 +186,6 @@ class VisualizerTab(QWidget):
         self.control_panel.set_playing(False)
 
     def _on_step_forward(self) -> None:
-        # If worker is playing, pause it first
         if self.worker.isRunning() and not self.worker._paused:
             self.worker.pause()
             self.control_panel.set_playing(False)
