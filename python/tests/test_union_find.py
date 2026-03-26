@@ -15,7 +15,6 @@ def test_union_and_connected():
     assert not uf.connected(0, 1)
     uf.union(0, 1)
     assert uf.connected(0, 1)
-    # Other pairs still disconnected
     assert not uf.connected(0, 2)
     assert not uf.connected(1, 3)
 
@@ -26,7 +25,6 @@ def test_transitive():
     uf.union(1, 2)
     assert uf.connected(0, 2)
     assert uf.connected(2, 0)
-    # Vertex 3 and 4 still isolated
     assert not uf.connected(0, 3)
     assert not uf.connected(2, 4)
 
@@ -48,14 +46,11 @@ def test_reset():
 
 def test_snapshot():
     uf = UnionFind(4)
-    # Before any union: every vertex is its own root
     snap = uf.snapshot()
     assert snap == {0: 0, 1: 1, 2: 2, 3: 3}
 
     uf.union(0, 1)
     snap2 = uf.snapshot()
-    # 0 and 1 must share the same root
     assert snap2[0] == snap2[1]
-    # 2 and 3 still isolated
     assert snap2[2] == 2
     assert snap2[3] == 3
