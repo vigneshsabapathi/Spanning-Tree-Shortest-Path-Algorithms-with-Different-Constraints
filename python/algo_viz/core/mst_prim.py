@@ -11,12 +11,10 @@ INF = float("inf")
 
 
 def _build_mst_edges(graph: Graph, parent: dict[int, int]) -> frozenset[int]:
-    """Return a frozenset of edge IDs derived from the parent dict."""
     edge_ids: set[int] = set()
     for v, u in parent.items():
         if u == -1:
             continue
-        # Find the edge id connecting u and v
         for adj in graph.adj[u]:
             if adj.dest == v:
                 edge_ids.add(adj.edge_id)
@@ -25,7 +23,6 @@ def _build_mst_edges(graph: Graph, parent: dict[int, int]) -> frozenset[int]:
 
 
 def prim_steps(graph: Graph, start: int = 0) -> Iterator[AlgorithmStep]:
-    """Yield AlgorithmStep objects tracing Prim's MST algorithm."""
     dist: dict[int, float] = {v: INF for v in range(graph.num_vertices)}
     parent: dict[int, int] = {v: -1 for v in range(graph.num_vertices)}
     in_mst: set[int] = set()
@@ -33,7 +30,6 @@ def prim_steps(graph: Graph, start: int = 0) -> Iterator[AlgorithmStep]:
     dist[start] = 0
 
     heap = MinHeap(graph.num_vertices)
-    # Insert all non-blocked vertices; blocked ones stay out of the MST
     for v in range(graph.num_vertices):
         if not graph.vertex_blocked[v]:
             heap.insert(int(dist[v]) if dist[v] != INF else 10**18, v)
@@ -65,7 +61,6 @@ def prim_steps(graph: Graph, start: int = 0) -> Iterator[AlgorithmStep]:
             v = adj.dest
             weight = adj.weight
 
-            # Skip blocked endpoints, edges already in MST, and blocked edges
             if graph.vertex_blocked[v] or v in in_mst or adj.edge_blocked:
                 continue
 
@@ -104,7 +99,6 @@ def prim_steps(graph: Graph, start: int = 0) -> Iterator[AlgorithmStep]:
 
 
 def prim(graph: Graph, start: int = 0) -> MSTResult:
-    """Run Prim's algorithm to completion and return the MST result."""
     last_step: AlgorithmStep | None = None
     for last_step in prim_steps(graph, start):
         pass
@@ -120,9 +114,6 @@ def prim(graph: Graph, start: int = 0) -> MSTResult:
         edges.append((e.src, e.dest, e.weight))
         total_weight += e.weight
 
-    active_vertices = (
-        last_step.settled_vertices if last_step is not None else frozenset()
-    )
     is_connected = len(edges) == graph.num_vertices - 1
 
     return MSTResult(
